@@ -29,6 +29,7 @@ char *get_first_argument(int argc, char **argv);
 static int is_fullwidth_katakana(wchar_t wc);
 static int is_halfwidth_katakana(wchar_t wc);
 static wchar_t to_hiragana(wchar_t c);
+static int print_yomi_katakana_to_hiragana(const char *yomi);
 
 int main(int argc, char **argv)
 {
@@ -41,6 +42,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Parse the .str file
+    
+
     // Initialize Mecab
     mecab_t *mecab = mecab_new2("-Oyomi");
     if (mecab == NULL)
@@ -50,7 +54,7 @@ int main(int argc, char **argv)
     }
 
     // Example text to analyze
-    const char *input = "お前はもう死んでいる！";
+    const char *input = "頑張って";
     const char *result = mecab_sparse_tostr(mecab, input);
     if (result == NULL)
     {
@@ -59,35 +63,11 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // Remove last empty character
-    printf("Full complete katakana: %s\n", result);
+    printf("Full complete phrase in katakana: %s\n", result);
 
-    // Multibyte -> wide-chars conversion respecting the locale
-    wchar_t w_result[BUFFER_SIZE];
-    size_t converted = mbstowcs(w_result, result, BUFFER_SIZE);
-    if (converted == (size_t)-1)
-    {
-        fprintf(stderr, "Conversion mbstowcs failed\n");
+    if (print_yomi_katakana_to_hiragana(result) != 0) {
         mecab_destroy(mecab);
         return 1;
-    }
-
-    // Display the wide character and its Unicode codepoint
-    for (size_t i = 0; i < converted; i++)
-    {
-        wchar_t katakana = w_result[i];
-        if (katakana == L'\n' || katakana == L'\0') 
-        {
-            continue;
-        }
-
-        wchar_t hiragana = to_hiragana(katakana);
-
-        printf("---------\n");
-        printf("Katakana: %lc\nUnicode: U+%04X\n", katakana, (unsigned int)katakana);
-        if (hiragana != katakana)
-            printf("Conversion in hiragana : %lc\n", hiragana);
-        printf("---------\n");
     }
 
     mecab_destroy(mecab);
@@ -130,4 +110,43 @@ static wchar_t to_hiragana(wchar_t c)
         return (c - 0xcf25);
     }
     return c;
+}
+
+static int print_yomi_katakana_to_hiragana(const char *yomi)
+{
+    wchar_t w_result[BUFFER_SIZE];
+    size_t converted = mbstowcs(w_result, yomi, BUFFER_SIZE);
+    if (converted == (size_t)-1)
+    {
+        fprintf(stderr, "Conversion mbstowcs failed\n");
+        return -1;
+    }
+
+    // Build a wide-character hiragana sentence
+    wchar_t hira_w[BUFFER_SIZE];
+    size_t out = 0;
+    for (size_t i = 0; i < converted && out < BUFFER_SIZE - 1; i++)
+    {
+        wchar_t katakana = w_result[i];
+        if (katakana == L'\n' || katakana == L'\0')
+        {
+            continue;
+        }
+        wchar_t hiragana = to_hiragana(katakana);
+        hira_w[out++] = hiragana;
+    }
+    hira_w[out] = L'\0';
+
+    // Convert wide hiragana back to multibyte for printing
+    char hira_mb[BUFFER_SIZE];
+    size_t mb_len = wcstombs(hira_mb, hira_w, BUFFER_SIZE);
+    if (mb_len == (size_t)-1)
+    {
+        fprintf(stderr, "Conversion wcstombs failed\n");
+        return -1;
+    }
+
+    printf("Full complete phrase in hiragana: %s\n", hira_mb);
+
+    return 0;
 }
