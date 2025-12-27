@@ -86,7 +86,7 @@ int main(int argc, char **argv)
         printf("---------\n");
         printf("Katakana: %lc\nUnicode: U+%04X\n", katakana, (unsigned int)katakana);
         if (hiragana != katakana)
-            printf("Conversion en hiragana : %lc\n", hiragana);
+            printf("Conversion in hiragana : %lc\n", hiragana);
         printf("---------\n");
     }
 
@@ -104,7 +104,7 @@ char *get_first_argument(int argc, char **argv)
     }
     else
     {
-        fprintf(stderr, "Argument manquant\n");
+        fprintf(stderr, "Argument is missing\n");
         return NULL;
     }
 }
