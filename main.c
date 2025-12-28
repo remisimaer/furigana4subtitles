@@ -33,14 +33,14 @@ int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
 
-    // Retrieve the path to the .str passed as argument
+    // Retrieve the path to the .srt passed as argument
     char **subtitle_files = get_path_to_files(argc, argv);
     if (subtitle_files == NULL)
     {
         return 1;
     }
 
-    // Parse the .str file
+    // Parse the .srt file
 
     // Initialize Mecab
     mecab_t *mecab = mecab_new2("-Oyomi");
@@ -92,10 +92,24 @@ char **get_path_to_files(int argc, char **argv)
         return NULL;
     }
 
+    int count_files = 0;
     for (int i = 1; i < argc; i++)
     {
-        file_paths[i - 1] = argv[i];
-        printf("Path to file #%d: %s\n", i, file_paths[i - 1]);
+        const char *extension = strrchr(argv[i], '.');
+        if (extension == NULL || strcmp(extension, ".srt") != 0) {
+            fprintf(stdout, "Warning: %s is not a .srt file\nSkipping that file.\n", argv[i]);
+            continue;
+        }
+        file_paths[count_files] = argv[i];
+        printf("Path to file #%d: %s\n", count_files + 1, file_paths[count_files]);
+        count_files++;
+    }
+
+    if (count_files == 0)
+    {
+        fprintf(stderr, "Error: no valid .srt files provived.\n");
+        free(file_paths);
+        return NULL;
     }
 
     return file_paths;
