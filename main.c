@@ -21,13 +21,21 @@
 #include <string.h>
 #include <wchar.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <mecab.h>
+
+#define CHECK(eval) if (! eval) { \
+    fprintf (stderr, "Exception:%s\n", mecab_strerror (mecab)); \
+    mecab_destroy(mecab); \
+    return -1; }
 
 char **get_path_to_files(int argc, char **argv);
 static int is_fullwidth_katakana(wchar_t wc);
 static int is_halfwidth_katakana(wchar_t wc);
 static wchar_t to_hiragana(wchar_t c);
+static bool is_kanji(char *c);
 static int print_yomi_katakana_to_hiragana(const char *yomi);
+char* get_mecab_node_field(const char* str, int n);
 
 int main(int argc, char **argv)
 {
@@ -44,25 +52,35 @@ int main(int argc, char **argv)
 
     // Initialize Mecab
     mecab_t *mecab = mecab_new2("-Oyomi");
-    if (mecab == NULL)
-    {
-        fprintf(stderr, "Error: mecab_new2 failed.\n");
-        free(subtitle_files);
-        return 1;
-    }
+    CHECK(mecab);
 
     // Example text to analyze
-    const char *input = "頑張って";
+    const char *input = "心理的瑕疵物件で困るね。";
     const char *result = mecab_sparse_tostr(mecab, input);
-    if (result == NULL)
-    {
-        fprintf(stderr, "Error: mecab_sparse_tostr returned NULL.\n");
-        mecab_destroy(mecab);
-        free(subtitle_files);
-        return 1;
-    }
-
+    CHECK(result);
     printf("Full complete phrase in katakana: %s\n", result);
+
+    const mecab_node_t *node;
+    node = mecab_sparse_tonode(mecab, input);
+    CHECK(node);
+
+    for (; node; node = node->next) {
+        if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
+            fwrite (node->surface, sizeof(char), node->length, stdout);
+            printf("feature:\t%s\n", node->feature);
+
+            // Get the full word
+            char* full_word = get_mecab_node_field(node->feature, 6); // 6 for full word.
+            if (full_word) {
+                // Check if it's a kanji
+                if (is_kanji(full_word)) {
+                    printf("kanji:\t%s\n", full_word);
+                }
+            }
+            
+            free(full_word);
+        }
+    }
 
     if (print_yomi_katakana_to_hiragana(result) != 0)
     {
@@ -138,6 +156,17 @@ static wchar_t to_hiragana(wchar_t c)
     return c;
 }
 
+static bool is_kanji(char *c)
+{
+    if ((L'\u4e00' <= c) && (c <= L'\u9fa5')) {
+			return true;
+		}
+		if ((L'\u3005' <= c) && (c <= L'\u3007')) {
+			return true;
+		}
+		return false;
+}
+
 static int print_yomi_katakana_to_hiragana(const char *yomi)
 {
     size_t size_alloc = strlen(yomi) + 1;
@@ -203,4 +232,18 @@ static int print_yomi_katakana_to_hiragana(const char *yomi)
     free(hira_mb);
 
     return 0;
+}
+
+// Get the a node of Mecab by its index
+char* get_mecab_node_field(const char* str, int n) {
+    if (!str) return NULL;
+    char* copy = strdup(str);
+    if (!copy) return NULL;
+    char* token = strtok(copy, ",");
+    for (int i = 0; i < n && token; i++) {
+        token = strtok(NULL, ",");
+    }
+    char* result = token ? strdup(token) : NULL;
+    free(copy);
+    return result;
 }
