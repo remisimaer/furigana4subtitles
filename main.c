@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <mecab.h>
 
-char *get_path_to_files(int argc, char **argv);
+char **get_path_to_files(int argc, char **argv);
 static int is_fullwidth_katakana(wchar_t wc);
 static int is_halfwidth_katakana(wchar_t wc);
 static wchar_t to_hiragana(wchar_t c);
@@ -34,20 +34,20 @@ int main(int argc, char **argv)
     setlocale(LC_ALL, "");
 
     // Retrieve the path to the .str passed as argument
-    char *dot_str_subtitles_paths_files = get_path_to_files(argc, argv);
-    if (dot_str_subtitles_paths_files == NULL)
+    char **subtitle_files = get_path_to_files(argc, argv);
+    if (subtitle_files == NULL)
     {
         return 1;
     }
 
     // Parse the .str file
-    
 
     // Initialize Mecab
     mecab_t *mecab = mecab_new2("-Oyomi");
     if (mecab == NULL)
     {
-        fprintf(stderr, "mecab_new2 failed\n");
+        fprintf(stderr, "Error: mecab_new2 failed.\n");
+        free(subtitle_files);
         return 1;
     }
 
@@ -56,38 +56,49 @@ int main(int argc, char **argv)
     const char *result = mecab_sparse_tostr(mecab, input);
     if (result == NULL)
     {
-        fprintf(stderr, "mecab_sparse_tostr returned NULL\n");
+        fprintf(stderr, "Error: mecab_sparse_tostr returned NULL.\n");
         mecab_destroy(mecab);
+        free(subtitle_files);
         return 1;
     }
 
     printf("Full complete phrase in katakana: %s\n", result);
 
-    if (print_yomi_katakana_to_hiragana(result) != 0) {
+    if (print_yomi_katakana_to_hiragana(result) != 0)
+    {
         mecab_destroy(mecab);
+        free(subtitle_files);
         return 1;
     }
 
     mecab_destroy(mecab);
+    free(subtitle_files);
 
     return 0;
 }
 
-char *get_path_to_files(int argc, char **argv)
+char **get_path_to_files(int argc, char **argv)
 {
-    if (argc > 1)
+    if (argc <= 1)
     {
-        for (int i = 1; i < argc; i++)
-        {
-            printf("Path to file #%d: %s\n", i, argv[i]);
-        }
-        return argv[1];
-    }
-    else
-    {
-        fprintf(stderr, "Path to file is missing\n");
+        fprintf(stderr, "Error: path to file is missing.\n");
         return NULL;
     }
+
+    char **file_paths = malloc((argc - 1) * sizeof(char *));
+    if (file_paths == NULL)
+    {
+        fprintf(stderr, "Error: malloc file_paths failed.\n");
+        return NULL;
+    }
+
+    for (int i = 1; i < argc; i++)
+    {
+        file_paths[i - 1] = argv[i];
+        printf("Path to file #%d: %s\n", i, file_paths[i - 1]);
+    }
+
+    return file_paths;
 }
 
 static int is_fullwidth_katakana(wchar_t wc)
@@ -117,25 +128,25 @@ static int print_yomi_katakana_to_hiragana(const char *yomi)
 {
     size_t size_alloc = strlen(yomi) + 1;
     wchar_t *w_result = malloc(size_alloc * sizeof(wchar_t));
-    if (w_result == NULL) 
+    if (w_result == NULL)
     {
-        fprintf(stderr, "malloc failed\n");
+        fprintf(stderr, "Error: w_result malloc failed.\n");
         return 1;
     }
 
     size_t converted = mbstowcs(w_result, yomi, size_alloc);
     if (converted == (size_t)-1)
     {
-        fprintf(stderr, "Conversion mbstowcs failed\n");
+        fprintf(stderr, "Conversion mbstowcs failed.\n");
         free(w_result);
         return 1;
     }
 
     // Build a wide-character hiragana sentence
     wchar_t *hira_w = malloc(size_alloc * sizeof(wchar_t));
-    if (hira_w == NULL) 
+    if (hira_w == NULL)
     {
-        fprintf(stderr, "malloc failed\n");
+        fprintf(stderr, "Error: hira_w malloc failed.\n");
         free(w_result);
         return 1;
     }
@@ -153,27 +164,27 @@ static int print_yomi_katakana_to_hiragana(const char *yomi)
     hira_w[out] = L'\0';
 
     free(w_result);
-    
+
     // Convert wide hiragana back to multibyte for printing
     size_t mbbuf = (out + 1) * MB_CUR_MAX;
     char *hira_mb = malloc(mbbuf);
     if (hira_mb == NULL)
     {
-        fprintf(stderr, "malloc failed\n");
+        fprintf(stderr, "Error: hira_mb malloc failed.\n");
         free(hira_w);
         return 1;
     }
     size_t mb_len = wcstombs(hira_mb, hira_w, mbbuf);
     if (mb_len == (size_t)-1)
     {
-        fprintf(stderr, "Conversion wcstombs failed\n");
+        fprintf(stderr, "Error: Conversion wcstombs failed.\n");
         free(hira_mb);
         free(hira_w);
         return 1;
     }
-    
+
     printf("Full complete phrase in hiragana: %s\n", hira_mb);
-    
+
     free(hira_w);
     free(hira_mb);
 
