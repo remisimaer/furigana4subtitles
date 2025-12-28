@@ -1,6 +1,6 @@
 # Furigana4Subtitles
 
-Convert Japanese subtitle files (.srt) to .ass format with furigana (reading aids) displayed above kanji characters.
+Convert Japanese subtitle files .srt to .ass format with furigana (reading aids) displayed above kanji characters.
 
 ## Prerequisites
 
