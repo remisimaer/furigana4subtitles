@@ -1,28 +1,54 @@
-# Warning
-This project is in WORK IN PROGRESS!
-IT IS NOT FUNCTIONAL!
+# Furigana4Subtitles
 
-# What does Furigana4Subtitles do?
-It converts .str subtitle files into .ass files with furigana displayed above the text.
-It works with major video players, including VLC.
+Convert Japanese subtitle files (.srt) to .ass format with furigana (reading aids) displayed above kanji characters.
 
-# Prerequisites
-```
+## Prerequisites
+
+### Linux (Debian/Ubuntu)
+```bash
 sudo apt update
 sudo apt install mecab libmecab-dev mecab-ipadic-utf8
 ```
 
-# Compile
-```
-gcc main.c -o main -lmecab
+### macOS
+```bash
+brew install mecab mecab-ipadic
 ```
 
-## Run the program
-### Linux
-```
-./main [argument: path to .str file]
-```
 ### Windows
+Download and install MeCab from: https://taku910.github.io/mecab/
+
+## Compilation
+```bash
+gcc main.c -o furigana4subtitles -lmecab
 ```
-main.exe [argument: path to .str file]
+
+## Usage
+
+### Convert single file
+```bash
+./furigana4subtitles subtitle.srt
 ```
+
+### Convert multiple files
+```bash
+./furigana4subtitles file1.srt file2.srt file3.srt
+```
+
+### Windows
+```cmd
+furigana4subtitles.exe subtitle.srt
+```
+
+## Output
+
+The program generates `.ass` files with the same name as the input files:
+- `subtitle.srt` → `subtitle.ass`
+
+## License
+
+GNU General Public License v3.0 or later
+
+## Author
+
+Rémi SIMAER <rsimaer@gmail.com>
