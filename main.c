@@ -23,9 +23,7 @@
 #include <stdlib.h>
 #include <mecab.h>
 
-#define BUFFER_SIZE 1024
-
-char *get_first_argument(int argc, char **argv);
+char *get_path_to_files(int argc, char **argv);
 static int is_fullwidth_katakana(wchar_t wc);
 static int is_halfwidth_katakana(wchar_t wc);
 static wchar_t to_hiragana(wchar_t c);
@@ -36,8 +34,8 @@ int main(int argc, char **argv)
     setlocale(LC_ALL, "");
 
     // Retrieve the path to the .str passed as argument
-    char *argument_dot_str_subtitle = get_first_argument(argc, argv);
-    if (argument_dot_str_subtitle == NULL)
+    char *dot_str_subtitles_paths_files = get_path_to_files(argc, argv);
+    if (dot_str_subtitles_paths_files == NULL)
     {
         return 1;
     }
@@ -75,16 +73,19 @@ int main(int argc, char **argv)
     return 0;
 }
 
-char *get_first_argument(int argc, char **argv)
+char *get_path_to_files(int argc, char **argv)
 {
     if (argc > 1)
     {
-        printf("Argument: %s\n", argv[1]);
+        for (int i = 1; i < argc; i++)
+        {
+            printf("Path to file #%d: %s\n", i, argv[i]);
+        }
         return argv[1];
     }
     else
     {
-        fprintf(stderr, "Argument is missing\n");
+        fprintf(stderr, "Path to file is missing\n");
         return NULL;
     }
 }
@@ -114,18 +115,32 @@ static wchar_t to_hiragana(wchar_t c)
 
 static int print_yomi_katakana_to_hiragana(const char *yomi)
 {
-    wchar_t w_result[BUFFER_SIZE];
-    size_t converted = mbstowcs(w_result, yomi, BUFFER_SIZE);
+    size_t size_alloc = strlen(yomi) + 1;
+    wchar_t *w_result = malloc(size_alloc * sizeof(wchar_t));
+    if (w_result == NULL) 
+    {
+        fprintf(stderr, "malloc failed\n");
+        return 1;
+    }
+
+    size_t converted = mbstowcs(w_result, yomi, size_alloc);
     if (converted == (size_t)-1)
     {
         fprintf(stderr, "Conversion mbstowcs failed\n");
-        return -1;
+        free(w_result);
+        return 1;
     }
 
     // Build a wide-character hiragana sentence
-    wchar_t hira_w[BUFFER_SIZE];
+    wchar_t *hira_w = malloc(size_alloc * sizeof(wchar_t));
+    if (hira_w == NULL) 
+    {
+        fprintf(stderr, "malloc failed\n");
+        free(w_result);
+        return 1;
+    }
     size_t out = 0;
-    for (size_t i = 0; i < converted && out < BUFFER_SIZE - 1; i++)
+    for (size_t i = 0; i < converted && out < size_alloc - 1; i++)
     {
         wchar_t katakana = w_result[i];
         if (katakana == L'\n' || katakana == L'\0')
@@ -137,16 +152,30 @@ static int print_yomi_katakana_to_hiragana(const char *yomi)
     }
     hira_w[out] = L'\0';
 
+    free(w_result);
+    
     // Convert wide hiragana back to multibyte for printing
-    char hira_mb[BUFFER_SIZE];
-    size_t mb_len = wcstombs(hira_mb, hira_w, BUFFER_SIZE);
+    size_t mbbuf = (out + 1) * MB_CUR_MAX;
+    char *hira_mb = malloc(mbbuf);
+    if (hira_mb == NULL)
+    {
+        fprintf(stderr, "malloc failed\n");
+        free(hira_w);
+        return 1;
+    }
+    size_t mb_len = wcstombs(hira_mb, hira_w, mbbuf);
     if (mb_len == (size_t)-1)
     {
         fprintf(stderr, "Conversion wcstombs failed\n");
-        return -1;
+        free(hira_mb);
+        free(hira_w);
+        return 1;
     }
-
+    
     printf("Full complete phrase in hiragana: %s\n", hira_mb);
+    
+    free(hira_w);
+    free(hira_mb);
 
     return 0;
 }
