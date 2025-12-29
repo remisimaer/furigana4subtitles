@@ -27,12 +27,12 @@ gcc main.c -o furigana4subtitles -lmecab
 
 ### Convert single file
 ```bash
-./furigana4subtitles subtitle.srt
+./furigana4subtitles "subtitle.srt"
 ```
 
 ### Convert multiple files
 ```bash
-./furigana4subtitles file1.srt file2.srt file3.srt
+./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
 ```
 
 ### Windows

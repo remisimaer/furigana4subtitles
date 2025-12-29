@@ -22,8 +22,8 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <mecab.h>
 #include <ctype.h>
+#include <mecab.h>
 
 typedef struct {
     char *kanji;
@@ -49,6 +49,7 @@ typedef struct {
     int baseline_y;
     int furigana_offset;
     float fixed_char_width;
+    int line_spacing;
 } FontConfig;
 
 char **get_path_to_files(int argc, char **argv);
@@ -58,7 +59,8 @@ char* get_mecab_node_field(const char* str, int n);
 char* katakana_to_hiragana(const char *katakana);
 Subtitle* parse_srt_file(const char *filepath, int *subtitle_count);
 FuriganaToken* analyze_text_syllabic(mecab_t *mecab, const char *text, int *token_count);
-int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, FontConfig *config);
+int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, FontConfig *config, mecab_t *mecab);
+void calculate_positions_for_line(const char *line, FuriganaToken *tokens, int token_count, FontConfig *config);
 void free_subtitles(Subtitle *subs, int count);
 void ms_to_ass_time(int ms, char *buffer);
 void calculate_positions(Subtitle *sub, FontConfig *config);
@@ -79,8 +81,9 @@ int main(int argc, char **argv)
         .screen_width = 1920,
         .screen_height = 1080,
         .baseline_y = 980,
-        .furigana_offset = 60,
-        .fixed_char_width = 52.0f
+        .furigana_offset = 50,
+        .fixed_char_width = 52.0f,
+        .line_spacing = 100
     };
 
     mecab_t *mecab = mecab_new2("");
@@ -106,7 +109,7 @@ int main(int argc, char **argv)
             calculate_positions(&subtitles[j], &config);
         }
 
-        if (generate_ass_file(subtitle_files[i], subtitles, subtitle_count, &config) == 0) {
+        if (generate_ass_file(subtitle_files[i], subtitles, subtitle_count, &config, mecab) == 0) {
             printf("Generated: %s.ass\n", subtitle_files[i]);
         }
 
@@ -390,6 +393,35 @@ void calculate_positions(Subtitle *sub, FontConfig *config)
     }
 }
 
+void calculate_positions_for_line(const char *line, FuriganaToken *tokens, int token_count, FontConfig *config)
+{
+    if (!line || token_count == 0) return;
+
+    int total_chars = count_chars(line);
+    float start_x = (config->screen_width - total_chars * config->fixed_char_width) / 2.0f;
+
+    mbstate_t state = {0};
+    size_t text_len = strlen(line);
+    size_t byte_idx = 0;
+    int char_idx = 0;
+    int token_idx = 0;
+
+    while (byte_idx < text_len && token_idx < token_count) {
+        if ((int)byte_idx == tokens[token_idx].byte_position) {
+            tokens[token_idx].x_position = start_x + (char_idx * config->fixed_char_width);
+            byte_idx += strlen(tokens[token_idx].kanji);
+            char_idx++;
+            token_idx++;
+        } else {
+            wchar_t wc;
+            size_t bytes = mbrtowc(&wc, line + byte_idx, text_len - byte_idx, &state);
+            if (bytes == (size_t)-1 || bytes == (size_t)-2 || bytes == 0) break;
+            byte_idx += bytes;
+            char_idx++;
+        }
+    }
+}
+
 Subtitle* parse_srt_file(const char *filepath, int *subtitle_count)
 {
     FILE *file = fopen(filepath, "r");
@@ -408,18 +440,21 @@ Subtitle* parse_srt_file(const char *filepath, int *subtitle_count)
     *subtitle_count = 0;
     char line[1024];
     int state = 0;
+    int current = -1;
 
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\r\n")] = 0;
 
-        if (state == 0 && isdigit(line[0])) {
-            state = 1;
+        if (state == 0) {
+            if (line[0] && isdigit((unsigned char)line[0])) {
+                state = 1;
+            }
         }
         else if (state == 1 && strstr(line, "-->")) {
             int h1, m1, s1, ms1, h2, m2, s2, ms2;
             if (sscanf(line, "%d:%d:%d,%d --> %d:%d:%d,%d",
                       &h1, &m1, &s1, &ms1, &h2, &m2, &s2, &ms2) == 8) {
-                
+
                 if (*subtitle_count >= capacity) {
                     capacity *= 2;
                     Subtitle *new_subs = realloc(subs, capacity * sizeof(Subtitle));
@@ -432,14 +467,37 @@ Subtitle* parse_srt_file(const char *filepath, int *subtitle_count)
                 subs[*subtitle_count].text = NULL;
                 subs[*subtitle_count].tokens = NULL;
                 subs[*subtitle_count].token_count = 0;
+                current = *subtitle_count;
                 state = 2;
             }
         }
-        else if (state == 2 && strlen(line) > 0) {
-            subs[*subtitle_count].text = strdup(line);
-            (*subtitle_count)++;
-            state = 0;
+        else if (state == 2) {
+            if (strlen(line) == 0) {
+                // end of block
+                if (current >= 0) (*subtitle_count)++;
+                current = -1;
+                state = 0;
+            } else if (current >= 0) {
+                // append line (keep newline between lines)
+                size_t oldlen = subs[current].text ? strlen(subs[current].text) : 0;
+                size_t addlen = strlen(line);
+                size_t need = oldlen + (oldlen ? 1 : 0) + addlen + 1;
+                char *newtext = realloc(subs[current].text, need);
+                if (!newtext) {
+                    free(subs[current].text);
+                    subs[current].text = NULL;
+                    break;
+                }
+                if (oldlen) newtext[oldlen] = '\n';
+                memcpy(newtext + oldlen + (oldlen ? 1 : 0), line, addlen);
+                newtext[oldlen + (oldlen ? 1 : 0) + addlen] = '\0';
+                subs[current].text = newtext;
+            }
         }
+    }
+
+    if (state == 2 && current >= 0) {
+        (*subtitle_count)++;
     }
 
     fclose(file);
@@ -457,7 +515,7 @@ void ms_to_ass_time(int ms, char *buffer)
     sprintf(buffer, "%d:%02d:%02d.%02d", h, m, s, cs);
 }
 
-int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, FontConfig *config)
+int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, FontConfig *config, mecab_t *mecab)
 {
     char output_path[512];
     strncpy(output_path, input_path, sizeof(output_path) - 5);
@@ -479,9 +537,9 @@ int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, Fo
 
     fprintf(file, "[V4+ Styles]\n");
     fprintf(file, "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n");
-    fprintf(file, "Style: Main,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,10,1\n", 
+    fprintf(file, "Style: Main,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,10,1\n",
             config->font_name, config->main_font_size);
-    fprintf(file, "Style: Furigana,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,7,10,10,10,1\n\n", 
+    fprintf(file, "Style: Furigana,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,5,10,10,10,1\n\n",
             config->font_name, config->furigana_font_size);
 
     fprintf(file, "[Events]\n");
@@ -492,22 +550,59 @@ int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, Fo
         ms_to_ass_time(subtitles[i].start_ms, start_time);
         ms_to_ass_time(subtitles[i].end_ms, end_time);
 
-        float center_x = config->screen_width / 2.0f;
-        
-        fprintf(file, "Dialogue: 0,%s,%s,Main,,0,0,0,,{\\pos(%.1f,%d)\\an5}%s\n", 
-                start_time, end_time, center_x, config->baseline_y,
-                subtitles[i].text ? subtitles[i].text : "");
+        if (!subtitles[i].text) continue;
 
-        if (subtitles[i].token_count > 0) {
-            int furigana_y = config->baseline_y - config->furigana_offset;
-            
-            for (int j = 0; j < subtitles[i].token_count; j++) {
-                FuriganaToken *token = &subtitles[i].tokens[j];
-                fprintf(file, "Dialogue: 1,%s,%s,Furigana,,0,0,0,,{\\pos(%.1f,%d)}%s\n",
-                        start_time, end_time, token->x_position, furigana_y,
-                        token->furigana ? token->furigana : "");
+        // split subtitle text into lines
+        char *copy = strdup(subtitles[i].text);
+        if (!copy) continue;
+        int lines_cap = 8;
+        char **lines = malloc(lines_cap * sizeof(char*));
+        int lines_count = 0;
+        char *saveptr = NULL;
+        char *tok = strtok_r(copy, "\n", &saveptr);
+        while (tok) {
+            if (lines_count >= lines_cap) {
+                lines_cap *= 2;
+                lines = realloc(lines, lines_cap * sizeof(char*));
             }
+            lines[lines_count++] = strdup(tok);
+            tok = strtok_r(NULL, "\n", &saveptr);
         }
+
+        for (int li = 0; li < lines_count; li++) {
+            char *line_text = lines[li];
+            float center_x = config->screen_width / 2.0f;
+            int line_spacing = config->line_spacing;
+            // compute Y so that first line (li==0) is above line 1, last line is baseline_y
+            int y = config->baseline_y - ((lines_count - 1 - li) * line_spacing);
+
+            fprintf(file, "Dialogue: 0,%s,%s,Main,,0,0,0,,{\\pos(%.1f,%d)\\an5}%s\n",
+                    start_time, end_time, center_x, y,
+                    line_text ? line_text : "");
+
+            int token_count = 0;
+            FuriganaToken *tokens = analyze_text_syllabic(mecab, line_text, &token_count);
+            if (token_count > 0 && tokens) {
+                calculate_positions_for_line(line_text, tokens, token_count, config);
+                int furigana_y = y - config->furigana_offset;
+                for (int tj = 0; tj < token_count; tj++) {
+                    FuriganaToken *t = &tokens[tj];
+                        float x = t->x_position + (config->fixed_char_width / 2.0f);
+                        // ensure furigana text is centered on the position (avoid overlap)
+                        fprintf(file, "Dialogue: 1,%s,%s,Furigana,,0,0,0,,{\\pos(%.1f,%d)\\an5}%s\n",
+                            start_time, end_time, x, furigana_y,
+                            t->furigana ? t->furigana : "");
+                    free(t->kanji);
+                    free(t->furigana);
+                }
+                free(tokens);
+            }
+
+            free(line_text);
+        }
+
+        free(lines);
+        free(copy);
     }
 
     fclose(file);
