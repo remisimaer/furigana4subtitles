@@ -445,12 +445,22 @@ Subtitle* parse_srt_file(const char *filepath, int *subtitle_count)
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\r\n")] = 0;
 
+        // strip UTF-8 BOM if present
+        if ((unsigned char)line[0] == 0xEF && (unsigned char)line[1] == 0xBB && (unsigned char)line[2] == 0xBF) {
+            size_t l = strlen(line + 3);
+            memmove(line, line + 3, l + 1);
+        }
+
         if (state == 0) {
             if (line[0] && isdigit((unsigned char)line[0])) {
                 state = 1;
+            } else if (strstr(line, "-->") != NULL) {
+                // tolerate SRT files where the numeric index is missing
+                state = 1;
             }
         }
-        else if (state == 1 && strstr(line, "-->")) {
+        
+        if (state == 1 && strstr(line, "-->") ) {
             int h1, m1, s1, ms1, h2, m2, s2, ms2;
             if (sscanf(line, "%d:%d:%d,%d --> %d:%d:%d,%d",
                       &h1, &m1, &s1, &ms1, &h2, &m2, &s2, &ms2) == 8) {
@@ -530,7 +540,7 @@ int generate_ass_file(const char *input_path, Subtitle *subtitles, int count, Fo
     }
 
     fprintf(file, "[Script Info]\n");
-    fprintf(file, "Title: Furigana Subtitles\n");
+    fprintf(file, "Title: Generated with Furigana4Subtitles https://furigana4subtitles.github.io\n");
     fprintf(file, "ScriptType: v4.00+\n");
     fprintf(file, "PlayResX: %d\n", config->screen_width);
     fprintf(file, "PlayResY: %d\n\n", config->screen_height);
