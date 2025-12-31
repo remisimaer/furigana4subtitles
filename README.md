@@ -10,35 +10,29 @@ sudo apt update
 sudo apt install mecab libmecab-dev mecab-ipadic-utf8
 ```
 
-### macOS
-```bash
-brew install mecab mecab-ipadic
-```
-
 ### Windows
-Download and install MeCab from: https://taku910.github.io/mecab/
+TODO
 
-## Compilation
+
+## Usage 
+### Linux
+#### Compile project
 ```bash
-gcc main.c -o furigana4subtitles -lmecab
+make
 ```
 
-## Usage
-
-### Convert single file
+#### Convert single file
 ```bash
 ./furigana4subtitles "subtitle.srt"
 ```
 
-### Convert multiple files
+#### Convert multiple files
 ```bash
 ./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
 ```
 
-### Windows
-```cmd
-furigana4subtitles.exe subtitle.srt
-```
+## Windows
+TODO
 
 ## Output
 
