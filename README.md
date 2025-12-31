@@ -38,17 +38,17 @@ make
 ./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
 ```
 
-# Recursive on a folder
+#### Recursive on a folder
 ```bash
 ./furigana4subtitles -R ./subs/
 ```
 
-# Recursive on multiple folders
+#### Recursive on multiple folders
 ```bash
 ./furigana4subtitles -R ./anime1/ ./anime2/
 ```
 
-# Mix of recursive on folder & files
+#### Mix of recursive on folder & files
 ```bash
 ./furigana4subtitles -R ./subs/ "file1.srt"
 ```
