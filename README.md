@@ -31,7 +31,7 @@ make
 ./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
 ```
 
-## Windows
+### Windows
 TODO
 
 ## Output
