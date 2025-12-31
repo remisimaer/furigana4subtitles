@@ -9,16 +9,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <types.h>
 #include <utils.h>
 #include <mecab_helpers.h>
@@ -27,18 +30,18 @@
 #include <mecab.h>
 #include <raylib.h>
 
+
 int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
-    if (argc < 2)
-    {
-        printf("Usage: %s file.srt [...]\n", argv[0]);
+    if (argc < 2) {
+        printf("Usage: %s [-R] file.srt|directory [...]\n", argv[0]);
+        printf("  -R  Process directories recursively\n");
         return 1;
     }
 
     mecab_t *mecab = mecab_new2("");
-    if (!mecab)
-    {
+    if (!mecab) {
         fprintf(stderr, "MeCab initialization failed\n");
         return 1;
     }
@@ -52,23 +55,39 @@ int main(int argc, char **argv)
         .baseline_y = 980,
         .furigana_offset = 48,
         .char_width = 52.0f,
-        .line_spacing = 96};
+        .line_spacing = 96
+    };
 
-    for (int i = 1; i < argc; i++)
-    {
-        int count = 0;
-        Subtitle *subs = parse_srt(argv[i], &count);
-        if (!subs)
+    int recursive = 0;
+    int start = 1;
+
+    if (strcmp(argv[1], "-R") == 0) {
+        recursive = 1;
+        start = 2;
+        if (argc < 3) {
+            fprintf(stderr, "Error: -R requires at least one path\n");
+            mecab_destroy(mecab);
+            return 1;
+        }
+    }
+
+    for (int i = start; i < argc; i++) {
+        struct stat st;
+        if (stat(argv[i], &st) != 0) {
+            fprintf(stderr, "Cannot access: %s\n", argv[i]);
             continue;
+        }
 
-        generate_ass(argv[i], subs, count, &cfg, mecab);
-
-        for (int j = 0; j < count; j++)
-            free(subs[j].text);
-        free(subs);
+        if (S_ISDIR(st.st_mode)) {
+            if (recursive)
+                scan_directory(argv[i], &cfg, mecab);
+            else
+                fprintf(stderr, "Skipping directory (use -R): %s\n", argv[i]);
+        } else if (ends_with_srt(argv[i])) {
+            process_file(argv[i], &cfg, mecab);
+        }
     }
 
     mecab_destroy(mecab);
-
     return 0;
 }

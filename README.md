@@ -33,20 +33,31 @@ make
 ./furigana4subtitles "subtitle.srt"
 ```
 
-#### Convert multiple files
+#### Convert multiple files one by one
 ```bash
 ./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
 ```
 
-## Output
+# Recursive on a folder
+```bash
+./furigana4subtitles -R ./subs/
+```
 
+# Recursive on multiple folders
+```bash
+./furigana4subtitles -R ./anime1/ ./anime2/
+```
+
+# Mix of recursive on folder & files
+```bash
+./furigana4subtitles -R ./subs/ "file1.srt"
+```
+## Output
 The program generates `.ass` files with the same name as the input files:
 - `subtitle.srt` → `subtitle.ass`
 
 ## License
-
 GNU General Public License v3.0 or later
 
 ## Author
-
 Rémi SIMAER <rsimaer@gmail.com>
