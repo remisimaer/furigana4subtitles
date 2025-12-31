@@ -5,10 +5,14 @@ Convert Japanese subtitle files .srt to .ass format with furigana (reading aids)
 ## Prerequisites
 
 ### Linux (Debian/Ubuntu)
+#### Install Mecab
 ```bash
 sudo apt update
 sudo apt install mecab libmecab-dev mecab-ipadic-utf8
 ```
+
+#### Install Raylib
+[Follow the official Raylib documentation](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux) 
 
 ### Windows
 TODO

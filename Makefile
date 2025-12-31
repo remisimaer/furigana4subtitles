@@ -1,11 +1,11 @@
 CC = gcc
 CFLAGS = -g -Iinclude -Wall -Wextra
-LDFLAGS = -lmecab
+LDFLAGS = -lmecab -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 SRCS = src/utils.c src/mecab_helpers.c src/srt.c src/ass.c
 
-all: main
+all: furigana4subtitles
 
-main: $(SRCS) main.c
+furigana4subtitles: $(SRCS) main.c
 	$(CC) $(CFLAGS) $(SRCS) main.c -o furigana4subtitles $(LDFLAGS)
 
 clean:

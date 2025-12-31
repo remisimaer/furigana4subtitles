@@ -19,12 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <types.h>
+#include <utils.h>
+#include <mecab_helpers.h>
+#include <srt.h>
+#include <ass.h>
 #include <mecab.h>
-#include "types.h"
-#include "utils.h"
-#include "mecab_helpers.h"
-#include "srt.h"
-#include "ass.h"
+#include <raylib.h>
 
 int main(int argc, char **argv)
 {
@@ -68,5 +69,6 @@ int main(int argc, char **argv)
     }
 
     mecab_destroy(mecab);
+
     return 0;
 }
