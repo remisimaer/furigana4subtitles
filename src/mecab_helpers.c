@@ -41,13 +41,24 @@ char *katakana_to_hiragana(const char *in)
     size_t len = strlen(in);
     wchar_t *wbuf = malloc((len + 1) * sizeof(wchar_t));
     if (!wbuf) return NULL;
-    mbstowcs(wbuf, in, len + 1);
+    if (mbstowcs(wbuf, in, len + 1) == (size_t)-1) {
+        free(wbuf);
+        return NULL;
+    }
     for (size_t i = 0; wbuf[i]; i++) {
         if (wbuf[i] >= 0x30A1 && wbuf[i] <= 0x30FA)
             wbuf[i] -= 0x60;
     }
     char *out = malloc(len * 4 + 1);
-    wcstombs(out, wbuf, len * 4);
+    if (!out) {
+        free(wbuf);
+        return NULL;
+    }
+    if (wcstombs(out, wbuf, len * 4 + 1) == (size_t)-1) {
+        free(wbuf);
+        free(out);
+        return NULL;
+    }
     free(wbuf);
     return out;
 }
@@ -60,6 +71,7 @@ FuriganaToken *analyze_text_with_mecab(mecab_t *mecab, const char *line, int *to
 
     int capacity = INITIAL_TOKEN_CAPACITY;
     FuriganaToken *tokens = malloc(capacity * sizeof(FuriganaToken));
+    if (!tokens) return NULL;
 
     int char_cursor = 0;
     for (; node; node = node->next) {
@@ -91,7 +103,16 @@ FuriganaToken *analyze_text_with_mecab(mecab_t *mecab, const char *line, int *to
 
         if (*token_count >= capacity) {
             capacity *= 2;
-            tokens = realloc(tokens, capacity * sizeof(FuriganaToken));
+            FuriganaToken *tmp = realloc(tokens, capacity * sizeof(FuriganaToken));
+            if (!tmp) {
+                for (int j = 0; j < *token_count; j++)
+                    free(tokens[j].reading);
+                free(tokens);
+                free(hiragana);
+                *token_count = 0;
+                return NULL;
+            }
+            tokens = tmp;
         }
 
         tokens[*token_count].reading = hiragana;

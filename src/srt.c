@@ -30,6 +30,10 @@ Subtitle *parse_srt(const char *path, int *count)
 
     int capacity = INITIAL_SUB_CAPACITY;
     Subtitle *subs = calloc(capacity, sizeof(Subtitle));
+    if (!subs) {
+        fclose(f);
+        return NULL;
+    }
 
     char line[MAX_LINE];
     int state = 0;
@@ -49,7 +53,16 @@ Subtitle *parse_srt(const char *path, int *count)
 
                 if (*count >= capacity) {
                     capacity *= 2;
-                    subs = realloc(subs, capacity * sizeof(Subtitle));
+                    Subtitle *tmp = realloc(subs, capacity * sizeof(Subtitle));
+                    if (!tmp) {
+                        for (int j = 0; j < *count; j++)
+                            free(subs[j].text);
+                        free(subs);
+                        fclose(f);
+                        *count = 0;
+                        return NULL;
+                    }
+                    subs = tmp;
                 }
 
                 subs[*count].start_ms = h1*MS_PER_HOUR + m1*MS_PER_MINUTE + s1*MS_PER_SECOND + ms1;

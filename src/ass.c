@@ -30,6 +30,10 @@ void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg,
     snprintf(out, sizeof(out), "%s.ass", input);
 
     FILE *f = fopen(out, "w");
+    if (!f) {
+        perror("fopen");
+        return;
+    }
 
     fprintf(f,
         "[Script Info]\nScriptType: v4.00+\nPlayResX: %d\nPlayResY: %d\n\n",
