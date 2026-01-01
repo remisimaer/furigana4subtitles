@@ -7,7 +7,8 @@ Convert Japanese subtitle files .srt to .ass format with furigana (reading aids)
 ## Prerequisites
 
 ### Windows
-For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps. Make sure you have installed WSL version 2.
+For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps. 
+Make sure you have installed WSL version 2.
 
 ### macOS
 I don't have a Mac so don't hesitate to contribute to the project.
