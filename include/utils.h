@@ -32,5 +32,6 @@ void process_file(const char *path, FontConfig *cfg, mecab_t *mecab);
 void scan_directory(const char *dir, FontConfig *cfg, mecab_t *mecab);
 void print_banner(void);
 FontConfig *get_default_config(void);
+FontConfig *create_scaled_config(int main_size);
 
 #endif

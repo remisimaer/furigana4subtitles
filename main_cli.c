@@ -37,11 +37,13 @@ static void print_menu(void)
 {
     printf("  ╔══════════════════════════════════════════════════════════════╗\n");
     printf("  ║                           MAIN MENU                          ║\n");
+    printf("  ║              .srt → .ass with furigana (ふりがな)            ║\n");
     printf("  ╠══════════════════════════════════════════════════════════════╣\n");
     printf("  ║                                                              ║\n");
     printf("  ║   [1] ➤ Convert file(s)                                      ║\n");
     printf("  ║   [2] ➤ Convert folder                                       ║\n");
-    printf("  ║   [3] ➤ Quit                                                 ║\n");
+    printf("  ║   [3] ➤ Set font size (current: %3dpx)                       ║\n", cfg->main_size);
+    printf("  ║   [4] ➤ Quit                                                 ║\n");
     printf("  ║                                                              ║\n");
     printf("  ╚══════════════════════════════════════════════════════════════╝\n");
     printf("\n  ➜ Choice: ");
@@ -148,6 +150,44 @@ static void convert_folder(mecab_t *mecab)
     printf("\nDone!\n");
 }
 
+static void set_font_size(void)
+{
+    char input[INPUT_SIZE];
+    printf("\n── Set Font Size ──\n");
+    printf("Current main font size: %dpx\n", cfg->main_size);
+    printf("All other properties will be scaled proportionally.\n");
+    printf("\nRecommended sizes:\n");
+    printf("  • 32px - Small (for dense subtitles)\n");
+    printf("  • 42px - Medium\n");
+    printf("  • 52px - Default\n");
+    printf("  • 62px - Large\n");
+    printf("  • 72px - Extra Large\n");
+    printf("\nEnter new font size in pixels (16-120), or 0 to cancel:\n> ");
+    
+    if (!fgets(input, INPUT_SIZE, stdin)) return;
+    trim_newline(input);
+    
+    int size = atoi(input);
+    if (size == 0) {
+        printf("Cancelled.\n");
+        return;
+    }
+    
+    if (size < 16 || size > 120) {
+        printf("Invalid size. Please choose a value between 16 and 120 pixels.\n");
+        return;
+    }
+    
+    cfg = create_scaled_config(size);
+    printf("\n✓ Font configuration updated!\n");
+    printf("  Main size:       %dpx\n", cfg->main_size);
+    printf("  Furigana size:   %dpx\n", cfg->furigana_size);
+    printf("  Char width:      %.1fpx\n", cfg->char_width);
+    printf("  Line spacing:    %dpx\n", cfg->line_spacing);
+    printf("  Furigana offset: %dpx\n", cfg->furigana_offset);
+    printf("  Baseline Y:      %dpx (from top)\n", cfg->baseline_y);
+}
+
 int main(void)
 {
     setlocale(LC_ALL, "");
@@ -177,6 +217,9 @@ int main(void)
                 convert_folder(mecab);
                 break;
             case '3':
+                set_font_size();
+                break;
+            case '4':
             case 'q':
             case 'Q':
                 running = 0;

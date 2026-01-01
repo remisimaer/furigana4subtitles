@@ -45,6 +45,30 @@ FontConfig *get_default_config(void)
     return &default_cfg;
 }
 
+FontConfig *create_scaled_config(int main_size)
+{
+    static FontConfig scaled_cfg;
+    
+    /* Base reference: 52px main size */
+    const int BASE_SIZE = 52;
+    float scale = (float)main_size / BASE_SIZE;
+    
+    scaled_cfg.font_name = default_cfg.font_name;
+    scaled_cfg.main_size = main_size;
+    scaled_cfg.furigana_size = (int)(26 * scale + 0.5f);      /* Half of main_size */
+    scaled_cfg.screen_w = default_cfg.screen_w;
+    scaled_cfg.screen_h = default_cfg.screen_h;
+    
+    int fixed_margin = 50;  /* Small margin from screen edge */
+    scaled_cfg.baseline_y = default_cfg.screen_h - fixed_margin - main_size;
+    
+    scaled_cfg.furigana_offset = (int)(48 * scale + 0.5f);    /* ~92% of main_size */
+    scaled_cfg.char_width = main_size;                        /* Same as main_size */
+    scaled_cfg.line_spacing = (int)(104 * scale + 0.5f);      /* 2x main_size */
+    
+    return &scaled_cfg;
+}
+
 void print_banner(void)
 {
     printf("\n");
