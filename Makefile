@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -Iinclude -Wall -Wextra
-LDFLAGS = -lmecab -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LDFLAGS = -lmecab
 SRCS = src/utils.c src/mecab_helpers.c src/srt.c src/ass.c
 
 all: furigana4subtitles

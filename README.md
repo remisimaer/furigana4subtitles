@@ -5,22 +5,19 @@ Convert Japanese subtitle files .srt to .ass format with furigana (reading aids)
 ## Prerequisites
 
 ### Windows
-For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps.
+For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps. Make sure you have installed WSL version 2.
 
 ### macOS
-macOS users: I don't have a Mac so please contribute by adding the steps you followed to the README ;)
+I don't have a Mac so don't hesitate to to the project.
 
 ### GNU/Linux & Windows
 Adapt the commands to your WSL2 / distribution.
+
 #### Install Mecab
 ```bash
 sudo apt update
 sudo apt install mecab libmecab-dev mecab-ipadic-utf8 pkg-config
 ```
-
-#### Install Raylib
-[Follow the official Raylib documentation](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux) 
-
 
 ## Usage 
 #### Compile project
@@ -33,28 +30,17 @@ make
 ./furigana4subtitles "subtitle.srt"
 ```
 
-#### Convert multiple files one by one
-```bash
-./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"
-```
+#### Examples
+| Action | Command |
+|--------|---------|
+| Multiple files | `./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"` |
+| All files from a folder | `./furigana4subtitles ./folder1/` |
+| Multiple folders | `./furigana4subtitles ./folder1/ ./folder2/` |
+| Mix folders and files | `./furigana4subtitles ./folder1/ "file1.srt" ./folder2/` |
 
-#### Recursive on a folder
-```bash
-./furigana4subtitles -R ./subs/
-```
-
-#### Recursive on multiple folders
-```bash
-./furigana4subtitles -R ./anime1/ ./anime2/
-```
-
-#### Mix of recursive on folder & files
-```bash
-./furigana4subtitles -R ./subs/ "file1.srt"
-```
 ## Output
-The program generates `.ass` files with the same name as the input files:
-- `subtitle.srt` → `subtitle.ass`
+The program generates `.ass` files in the same directory as the input files:
+- `/path/to/subtitle.srt` → `/path/to/subtitle.ass`
 
 ## License
 GNU General Public License v3.0 or later

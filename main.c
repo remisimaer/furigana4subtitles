@@ -28,15 +28,12 @@
 #include <srt.h>
 #include <ass.h>
 #include <mecab.h>
-#include <raylib.h>
-
 
 int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
     if (argc < 2) {
-        printf("Usage: %s [-R] file.srt|directory [...]\n", argv[0]);
-        printf("  -R  Process directories recursively\n");
+        printf("Usage: %s file.srt|directory [...]\n", argv[0]);
         return 1;
     }
 
@@ -58,20 +55,7 @@ int main(int argc, char **argv)
         .line_spacing = 96
     };
 
-    int recursive = 0;
-    int start = 1;
-
-    if (strcmp(argv[1], "-R") == 0) {
-        recursive = 1;
-        start = 2;
-        if (argc < 3) {
-            fprintf(stderr, "Error: -R requires at least one path\n");
-            mecab_destroy(mecab);
-            return 1;
-        }
-    }
-
-    for (int i = start; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         struct stat st;
         if (stat(argv[i], &st) != 0) {
             fprintf(stderr, "Cannot access: %s\n", argv[i]);
@@ -79,10 +63,7 @@ int main(int argc, char **argv)
         }
 
         if (S_ISDIR(st.st_mode)) {
-            if (recursive)
-                scan_directory(argv[i], &cfg, mecab);
-            else
-                fprintf(stderr, "Skipping directory (use -R): %s\n", argv[i]);
+            scan_directory(argv[i], &cfg, mecab);
         } else if (ends_with_srt(argv[i])) {
             process_file(argv[i], &cfg, mecab);
         }
