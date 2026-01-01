@@ -192,7 +192,9 @@ FuriganaToken *analyze_text_with_mecab(mecab_t *mecab, const char *line, int *to
         if (node->stat != MECAB_NOR_NODE && node->stat != MECAB_UNK_NODE) continue;
 
         char surface[256] = {0};
-        strncpy(surface, node->surface, node->length);
+        size_t copy_len = node->length < 255 ? node->length : 255;
+        strncpy(surface, node->surface, copy_len);
+        surface[copy_len] = '\0';
         int surface_chars = count_unicode_chars(surface);
         if (surface_chars == 0) continue;
 

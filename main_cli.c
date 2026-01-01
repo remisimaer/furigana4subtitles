@@ -1,5 +1,5 @@
 /*
- * Furigana4subtitles - Interactive CLI
+ * Furigana4subtitles
  * Copyright (C) 2026 Rémi SIMAER <rsimaer@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify

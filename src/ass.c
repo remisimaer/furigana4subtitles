@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +27,7 @@
 
 void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg, mecab_t *mecab)
 {
-    char out[MAX_PATH];
+    char out[JPSUB_MAX_PATH];
     snprintf(out, sizeof(out), "%s.ass", input);
 
     FILE *f = fopen(out, "w");
@@ -91,6 +92,7 @@ void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg,
         }
 
         char *copy = strdup(subs[i].text);
+        if (!copy) continue;
         char *save = NULL;
         char *line = strtok_r(copy, "\n", &save);
         int line_idx = 0;

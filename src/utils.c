@@ -153,7 +153,7 @@ void process_file(const char *path, FontConfig *cfg, mecab_t *mecab)
     if (!subs) return;
 
     // Remove .srt extension and add .ass
-    char outpath[MAX_PATH];
+    char outpath[JPSUB_MAX_PATH];
     strncpy(outpath, path, sizeof(outpath) - 1);
     outpath[sizeof(outpath) - 1] = '\0';
     char *dot = strrchr(outpath, '.');
@@ -176,7 +176,7 @@ void scan_directory(const char *dir, FontConfig *cfg, mecab_t *mecab)
     while ((entry = readdir(d))) {
         if (entry->d_name[0] == '.') continue;
 
-        char path[MAX_PATH];
+        char path[JPSUB_MAX_PATH];
         snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
         struct stat st;

@@ -1,5 +1,7 @@
 # Furigana4Subtitles
 
+![Alt text](furigana4subtitles.png)
+
 Convert Japanese subtitle files .srt to .ass format with furigana (reading aids) displayed above kanji characters.
 
 ## Prerequisites
@@ -23,7 +25,7 @@ sudo apt install mecab libmecab-dev mecab-ipadic-utf8 pkg-config
 
 Two versions are available:
 
-### Command-line version
+### Compile
 ```bash
 make
 ```
@@ -43,7 +45,6 @@ make
 
 ### Interactive CLI version
 ```bash
-make cli
 ./furigana4subtitles-cli
 ```
 - **Option 1**: Convert one or more `.srt` files by entering their paths

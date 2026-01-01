@@ -81,7 +81,11 @@ Subtitle *parse_srt(const char *path, int *count)
             } else if (idx >= 0) {
                 size_t old = subs[idx].text ? strlen(subs[idx].text) : 0;
                 size_t add = strlen(line);
-                subs[idx].text = realloc(subs[idx].text, old + add + 2);
+                char *tmp = realloc(subs[idx].text, old + add + 2);
+                if (!tmp) {
+                    continue;
+                }
+                subs[idx].text = tmp;
                 if (old) { subs[idx].text[old] = '\n'; strcpy(subs[idx].text + old + 1, line); }
                 else strcpy(subs[idx].text, line);
             }
