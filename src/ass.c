@@ -53,13 +53,20 @@ void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg,
         format_ass_time(subs[i].start_ms, ts);
         format_ass_time(subs[i].end_ms, te);
 
+        /* Count the number of lines first */
+        int num_lines = 1;
+        for (const char *p = subs[i].text; *p; p++) {
+            if (*p == '\n') num_lines++;
+        }
+
         char *copy = strdup(subs[i].text);
         char *save = NULL;
         char *line = strtok_r(copy, "\n", &save);
         int line_idx = 0;
 
         while (line) {
-            int y = cfg->baseline_y - line_idx * cfg->line_spacing;
+            /* First line at top, subsequent lines below */
+            int y = cfg->baseline_y - (num_lines - 1 - line_idx) * cfg->line_spacing;
             fprintf(f, "Dialogue: 0,%s,%s,Main,,0,0,0,,{\\pos(%.1f,%d)\\an5}%s\n",
                 ts, te, cfg->screen_w / 2.0f, y, line);
 
