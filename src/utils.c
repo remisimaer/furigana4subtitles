@@ -37,7 +37,7 @@ static FontConfig default_cfg = {
     .baseline_y = 980,
     .furigana_offset = 48,
     .char_width = 52.0f,
-    .line_spacing = 96
+    .line_spacing = 104
 };
 
 FontConfig *get_default_config(void)

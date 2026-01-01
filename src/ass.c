@@ -53,10 +53,41 @@ void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg,
         format_ass_time(subs[i].start_ms, ts);
         format_ass_time(subs[i].end_ms, te);
 
-        /* Count the number of lines first */
+        /* Count the number of lines in this subtitle */
         int num_lines = 1;
         for (const char *p = subs[i].text; *p; p++) {
             if (*p == '\n') num_lines++;
+        }
+
+        /* Count total lines for all simultaneous subtitles (same timing) */
+        int total_sim_lines = num_lines;
+        int lines_after = 0;  /* Lines from subsequent simultaneous subs */
+        for (int j = i + 1; j < count; j++) {
+            if (subs[j].start_ms == subs[i].start_ms && subs[j].end_ms == subs[i].end_ms) {
+                int sub_lines = 1;
+                for (const char *p = subs[j].text; *p; p++) {
+                    if (*p == '\n') sub_lines++;
+                }
+                total_sim_lines += sub_lines;
+                lines_after += sub_lines;
+            } else {
+                break;
+            }
+        }
+
+        /* Count lines from previous simultaneous subs */
+        int lines_before = 0;
+        for (int j = i - 1; j >= 0; j--) {
+            if (subs[j].start_ms == subs[i].start_ms && subs[j].end_ms == subs[i].end_ms) {
+                int sub_lines = 1;
+                for (const char *p = subs[j].text; *p; p++) {
+                    if (*p == '\n') sub_lines++;
+                }
+                lines_before += sub_lines;
+                total_sim_lines += sub_lines;
+            } else {
+                break;
+            }
         }
 
         char *copy = strdup(subs[i].text);
@@ -65,8 +96,9 @@ void generate_ass(const char *input, Subtitle *subs, int count, FontConfig *cfg,
         int line_idx = 0;
 
         while (line) {
-            /* First line at top, subsequent lines below */
-            int y = cfg->baseline_y - (num_lines - 1 - line_idx) * cfg->line_spacing;
+            /* Position from bottom, accounting for all simultaneous lines */
+            int line_from_bottom = lines_after + (num_lines - 1 - line_idx);
+            int y = cfg->baseline_y - line_from_bottom * cfg->line_spacing;
             fprintf(f, "Dialogue: 0,%s,%s,Main,,0,0,0,,{\\pos(%.1f,%d)\\an5}%s\n",
                 ts, te, cfg->screen_w / 2.0f, y, line);
 
