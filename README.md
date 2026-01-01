@@ -23,21 +23,16 @@ sudo apt install mecab libmecab-dev mecab-ipadic-utf8 pkg-config
 
 ## Usage
 
-Two versions are available:
-
 ### Compile
 ```bash
 make
 ```
 
-#### Convert single file
-```bash
-./furigana4subtitles "subtitle.srt"
-```
-
-#### Examples
+#### Convert subtitles
+#### Commands
 | Action | Command |
 |--------|---------|
+| Single file | `./furigana4subtitles "subtitle.srt"` |
 | Multiple files | `./furigana4subtitles "file1.srt" "file2.srt" "file3.srt"` |
 | All files from a folder | `./furigana4subtitles ./folder1/` |
 | Multiple folders | `./furigana4subtitles ./folder1/ ./folder2/` |
