@@ -8,5 +8,8 @@ all: furigana4subtitles
 furigana4subtitles: $(SRCS) main.c
 	$(CC) $(CFLAGS) $(SRCS) main.c -o furigana4subtitles $(LDFLAGS)
 
+cli: $(SRCS) main_cli.c
+	$(CC) $(CFLAGS) $(SRCS) main_cli.c -o furigana4subtitles-cli $(LDFLAGS)
+
 clean:
-	rm -f furigana4subtitles *.o *.ass
+	rm -f furigana4subtitles furigana4subtitles-cli *.o *.ass

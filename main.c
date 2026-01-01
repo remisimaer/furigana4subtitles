@@ -37,23 +37,15 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    print_banner();
+
     mecab_t *mecab = mecab_new2("");
     if (!mecab) {
         fprintf(stderr, "MeCab initialization failed\n");
         return 1;
     }
 
-    FontConfig cfg = {
-        .font_name = "MS Gothic",
-        .main_size = 52,
-        .furigana_size = 26,
-        .screen_w = 1920,
-        .screen_h = 1080,
-        .baseline_y = 980,
-        .furigana_offset = 48,
-        .char_width = 52.0f,
-        .line_spacing = 96
-    };
+    FontConfig *cfg = get_default_config();
 
     for (int i = 1; i < argc; i++) {
         struct stat st;
@@ -63,9 +55,9 @@ int main(int argc, char **argv)
         }
 
         if (S_ISDIR(st.st_mode)) {
-            scan_directory(argv[i], &cfg, mecab);
+            scan_directory(argv[i], cfg, mecab);
         } else if (ends_with_srt(argv[i])) {
-            process_file(argv[i], &cfg, mecab);
+            process_file(argv[i], cfg, mecab);
         }
     }
 

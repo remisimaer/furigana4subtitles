@@ -30,5 +30,7 @@ int is_kanji(wchar_t c);
 int ends_with_srt(const char *path);
 void process_file(const char *path, FontConfig *cfg, mecab_t *mecab);
 void scan_directory(const char *dir, FontConfig *cfg, mecab_t *mecab);
+void print_banner(void);
+FontConfig *get_default_config(void);
 
 #endif

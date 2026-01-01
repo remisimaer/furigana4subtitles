@@ -28,6 +28,60 @@
 #include "../include/ass.h"
 #include <mecab.h>
 
+static FontConfig default_cfg = {
+    .font_name = "MS Gothic",
+    .main_size = 52,
+    .furigana_size = 26,
+    .screen_w = 1920,
+    .screen_h = 1080,
+    .baseline_y = 980,
+    .furigana_offset = 48,
+    .char_width = 52.0f,
+    .line_spacing = 96
+};
+
+FontConfig *get_default_config(void)
+{
+    return &default_cfg;
+}
+
+void print_banner(void)
+{
+    printf("\n");
+    printf("  ▄▄▄▄▄ ▄▄ ▄▄ ▄▄▄▄  ▄▄  ▄▄▄▄  ▄▄▄  ▄▄  ▄▄  ▄▄▄    ██  ██    ▄▄▄▄ ▄▄ ▄▄ ▄▄▄▄ ▄▄▄▄▄▄ ▄▄ ▄▄▄▄▄▄ ▄▄    ▄▄▄▄▄  ▄▄▄▄\n");
+    printf("  ██▄▄  ██ ██ ██▄█▄ ██ ██ ▄▄ ██▀██ ███▄██ ██▀██   ▀█████   ███▄▄ ██ ██ ██▄██  ██   ██   ██   ██    ██▄▄  ███▄▄\n");
+    printf("  ██    ▀███▀ ██ ██ ██ ▀███▀ ██▀██ ██ ▀██ ██▀██       ██   ▄▄██▀ ▀███▀ ██▄█▀  ██   ██   ██   ██▄▄▄ ██▄▄▄ ▄▄██▀\n");
+    printf("\n");
+    printf("                     Kanji blocking your anime night? This kitty brings furigana~ ♪\n");
+    printf("                        漢字が読めなくて困ってる？この子猫がふりがなを届けるよ～♪\n");
+    printf("\n");
+    printf("                                    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀⠀⠀\n");
+    printf("                                    ⠀⠀⠀⠀⢀⡴⣆⠀⠀⠀⠀⠀⣠⡀⠀⠀⠀⠀⠀⠀⣼⣿⡗⠀⠀⠀⠀\n");
+    printf("                                    ⠀⠀⠀⣠⠟⠀⠘⠷⠶⠶⠶⠾⠉⢳⡄⠀⠀⠀⠀⠀⣧⣿⠀⠀⠀⠀⠀\n");
+    printf("                                    ⠀⠀⣰⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣤⣤⣤⣤⣤⣿⢿⣄⠀⠀⠀⠀\n");
+    printf("                                    ⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⠀⠙⣷⡴⠶⣦\n");
+    printf("                                    ⠀⠀⢱⡀⠀⠉⠉⠀⠀⠀⠀⠛⠃⠀⢠⡟⠀⠀⠀⢀⣀⣠⣤⠿⠞⠛⠋\n");
+    printf("                                    ⣠⠾⠋⠙⣶⣤⣤⣤⣤⣤⣀⣠⣤⣾⣿⠴⠶⠚⠋⠉⠁⠀⠀⠀⠀⠀⠀\n");
+    printf("                                    ⠛⠒⠛⠉⠉⠀⠀⠀⣴⠟⢃⡴⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("                                    ⠀⠀⠀⠀⠀⠀⠀⠀⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("\n");
+    printf("                                      (^_^) Version 1.0.0 (^_^)\n");
+    printf("\n");
+    printf("  ════════════════════════════════════════════════════════════════════════════════════════════════════\n");
+    printf("\n");
+    printf("  * Find this useful? Buy me a coffee!\n");
+    printf("    https://www.paypal.com/donate/?hosted_button_id=2ZYLTYB2R9XGC\n");
+    printf("\n");
+    printf("  * Want to contribute?\n");
+    printf("    https://github.com/remisimaer/furigana4subtitles\n");
+    printf("\n");
+    printf("  * 開発者を探している採用担当者の方は、ぜひご連絡ください。\n");
+    printf("    https://www.remisimaer.com\n");
+    printf("\n");
+    printf("  ════════════════════════════════════════════════════════════════════════════════════════════════════\n");
+    printf("\n");
+}
+
 int count_unicode_chars(const char *s)
 {
     if (!s) return 0;
