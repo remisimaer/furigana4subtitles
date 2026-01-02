@@ -4,6 +4,8 @@
 
 Convert Japanese subtitle files .srt to .ass format with furigana (reading aids) displayed above kanji characters.
 
+Unlike most subtitle solutions that rely on ruby annotations (which don’t work properly in VLC), this tool uses a different technique, making the subtitles fully compatible with VLC.
+
 ## Prerequisites
 
 ### Windows
