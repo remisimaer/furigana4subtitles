@@ -77,7 +77,7 @@ make clean
 ```
   ╔══════════════════════════════════════════════════════════════╗
   ║                           MAIN MENU                          ║
-  ║              .srt → .ass with furigana (ふりがな)            ║
+  ║              .srt → .ass with furigana (ふりがな)             ║
   ╠══════════════════════════════════════════════════════════════╣
   ║   [1] Convert subtitles                                      ║
   ║   [2] Set font size (current:  52px)                         ║
