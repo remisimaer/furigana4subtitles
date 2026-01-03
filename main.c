@@ -1,66 +1,61 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
 /*
- * Furigana4subtitles
+ * Furigana4subtitles - main.c
  * Copyright (C) 2026 Rémi SIMAER <rsimaer@gmail.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * Command-line tool for converting SRT subtitles to ASS with furigana.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <string.h>
-#include <dirent.h>
 #include <sys/stat.h>
-#include <types.h>
-#include <utils.h>
-#include <mecab_helpers.h>
-#include <srt.h>
-#include <ass.h>
 #include <mecab.h>
+
+#include "types.h"
+#include "utils.h"
+#include "mecab_helpers.h"
+#include "srt.h"
+#include "ass.h"
 
 int main(int argc, char **argv)
 {
-    setlocale(LC_ALL, "");
-    if (argc < 2) {
-        printf("Usage: %s file.srt|directory [...]\n", argv[0]);
-        return 1;
-    }
+	mecab_t *mecab;
+	struct font_config *cfg;
+	int i;
 
-    print_banner();
+	setlocale(LC_ALL, "");
 
-    mecab_t *mecab = mecab_new2("");
-    if (!mecab) {
-        fprintf(stderr, "MeCab initialization failed\n");
-        return 1;
-    }
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s file.srt|directory [...]\n", argv[0]);
+		return 1;
+	}
 
-    FontConfig *cfg = get_default_config();
+	print_banner();
 
-    for (int i = 1; i < argc; i++) {
-        struct stat st;
-        if (stat(argv[i], &st) != 0) {
-            fprintf(stderr, "Cannot access: %s\n", argv[i]);
-            continue;
-        }
+	mecab = mecab_new2("");
+	if (!mecab) {
+		fprintf(stderr, "MeCab initialization failed\n");
+		return 1;
+	}
 
-        if (S_ISDIR(st.st_mode)) {
-            scan_directory(argv[i], cfg, mecab);
-        } else if (ends_with_srt(argv[i])) {
-            process_file(argv[i], cfg, mecab);
-        }
-    }
+	cfg = get_default_config();
 
-    mecab_destroy(mecab);
-    return 0;
+	for (i = 1; i < argc; i++) {
+		struct stat st;
+
+		if (stat(argv[i], &st) != 0) {
+			fprintf(stderr, "Cannot access: %s\n", argv[i]);
+			continue;
+		}
+
+		if (S_ISDIR(st.st_mode))
+			scan_directory(argv[i], cfg, mecab);
+		else if (ends_with_srt(argv[i]))
+			process_file(argv[i], cfg, mecab);
+	}
+
+	mecab_destroy(mecab);
+	return 0;
 }

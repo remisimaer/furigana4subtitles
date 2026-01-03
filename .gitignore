@@ -1,7 +1,27 @@
-.vscode
-*.srt
-*.ass
-main
+# Build artifacts
+obj/
+*.o
+*.a
+*.so
+
+# Executables
 furigana4subtitles
-subs
 furigana4subtitles-cli
+*.exe
+
+# Generated output
+*.ass
+
+# Test files
+*.srt
+subs/
+
+# Editor / IDE
+.vscode/
+*~
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
