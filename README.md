@@ -1,8 +1,12 @@
 # Furigana4Subtitles
 
-![Alt text](furigana4subtitles.png)
+A free & open-source tool for Japanese learners who watch anime with Japanese subtitles.
 
-Convert Japanese subtitle files .srt to .ass format with furigana (reading aids) displayed above kanji characters.
+**Furigana4Subtitles** automatically converts `.srt` subtitles into `.ass` format, with hiragana readings (ふりがな) displayed above kanji — no more pausing to look up readings.
+
+It works seamlessly with **VLC** (uses a rendering technique compatible with VLC, unlike ruby annotations).
+
+![Alt text](furigana4subtitles.png)
 
 ## Prerequisites
 
@@ -11,16 +15,25 @@ For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl
 
 Make sure you have installed WSL version 2.
 
+Once you have installed WSL2 with a GNU/Linux distribution (Ubuntu is recommended), run all of the following steps in the WSL2 terminal.
+
 ### macOS
 I don't have a Mac so don't hesitate to contribute to the project.
 
-### GNU/Linux & Windows with WSL2
+### GNU/Linux
 
-#### Install MeCab
 ```bash
 sudo apt update
-sudo apt install mecab libmecab-dev mecab-ipadic-utf8
+sudo apt install build-essential git mecab libmecab-dev mecab-ipadic-utf8
 ```
+
+## Clone the project
+```bash
+git clone https://github.com/remisimaer/furigana4subtitles.git
+cd furigana4subtitles/
+```
+
+The following steps should be executed inside the furigana4subtitles folder.
 
 ## Build
 
@@ -98,6 +111,13 @@ main.c               # Command-line entry point
 main_cli.c           # Interactive entry point
 obj/                 # Compiled object files (not committed)
 ```
+
+## Roadmap
+
+If the project becomes popular:
+
+- A GUI version will be developed for Windows and GNU/Linux. Raylib is a candidate, but suggestions for other lightweight, cross-platform solutions are welcome.
+- A one-click installer will be developed for Windows, GNU/Linux, and macOS.
 
 ## License
 
