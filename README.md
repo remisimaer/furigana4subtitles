@@ -8,8 +8,6 @@ It works seamlessly with **VLC** (uses a rendering technique compatible with VLC
 
 ![Alt text](furigana4subtitles.png)
 
-Unlike most subtitle solutions that rely on ruby annotations (which don’t work properly in VLC), this tool uses a different technique, making the subtitles fully compatible with VLC.
-
 ## Prerequisites
 
 ### Windows
