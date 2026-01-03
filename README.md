@@ -89,16 +89,16 @@ Generated `.ass` files are placed alongside the input files:
 ## Project Structure
 
 ```
-include/             # Headers
+include/                # Headers
 src/
-  ├── utils.c        # File operations, config
-  ├── srt.c          # SRT parser
-  ├── ass.c          # ASS generator
-  ├── mecab_helpers.c # MeCab integration, furigana extraction
-  └── cli.c          # Interactive CLI logic
-main.c               # Command-line entry point
-main_cli.c           # Interactive entry point
-obj/                 # Compiled object files (not committed)
+  ├── utils.c           # File operations, config
+  ├── srt.c             # SRT parser
+  ├── ass.c             # ASS generator
+  ├── mecab_helpers.c   # MeCab integration, furigana extraction
+  └── cli.c             # Interactive CLI logic
+main.c                  # Command-line entry point
+main_cli.c              # Interactive entry point
+obj/                    # Compiled object files (not committed)
 ```
 
 ## Roadmap
