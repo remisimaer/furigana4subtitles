@@ -42,20 +42,3 @@ furigana4subtitles-cli: $(OBJS) main_cli.c
 
 clean:
 	rm -rf $(OBJDIR) $(TARGETS)
-	rm -f *.ass
-
-# Check coding style (requires checkpatch.pl from Linux kernel)
-checkpatch:
-	@if command -v checkpatch.pl >/dev/null 2>&1; then \
-		checkpatch.pl --no-tree -f $(SRCS) main.c main_cli.c include/*.h; \
-	else \
-		echo "checkpatch.pl not found in PATH"; \
-	fi
-
-# Static analysis with sparse (if available)
-sparse:
-	@if command -v sparse >/dev/null 2>&1; then \
-		sparse $(CFLAGS) $(SRCS) main.c main_cli.c; \
-	else \
-		echo "sparse not found in PATH"; \
-	fi
