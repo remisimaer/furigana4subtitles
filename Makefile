@@ -1,15 +1,61 @@
-CC = gcc
-CFLAGS = -g -Iinclude -Wall -Wextra -pedantic
-LDFLAGS = -lmecab
-SRCS = src/utils.c src/mecab_helpers.c src/srt.c src/ass.c
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Furigana4subtitles Makefile
+#
 
-all: furigana4subtitles furigana4subtitles-cli
+CC		= gcc
+CFLAGS		= -Wall -Wextra -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS		+= -Wold-style-definition -Werror=implicit-function-declaration
+CFLAGS		+= -std=c99 -pedantic -g -Iinclude
+LDFLAGS		= -lmecab
 
-furigana4subtitles: $(SRCS) main.c
-	$(CC) $(CFLAGS) $(SRCS) main.c -o furigana4subtitles $(LDFLAGS)
+# Source files
+SRCDIR		= src
+SRCS		= $(SRCDIR)/utils.c \
+		  $(SRCDIR)/mecab_helpers.c \
+		  $(SRCDIR)/srt.c \
+		  $(SRCDIR)/ass.c \
+		  $(SRCDIR)/cli.c
 
-furigana4subtitles-cli: $(SRCS) main_cli.c
-	$(CC) $(CFLAGS) $(SRCS) main_cli.c -o furigana4subtitles-cli $(LDFLAGS)
+# Object files
+OBJDIR		= obj
+OBJS		= $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+
+# Targets
+TARGETS		= furigana4subtitles furigana4subtitles-cli
+
+.PHONY: all clean
+
+all: $(TARGETS)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+furigana4subtitles: $(OBJS) main.c
+	$(CC) $(CFLAGS) $(OBJS) main.c -o $@ $(LDFLAGS)
+
+furigana4subtitles-cli: $(OBJS) main_cli.c
+	$(CC) $(CFLAGS) $(OBJS) main_cli.c -o $@ $(LDFLAGS)
 
 clean:
-	rm -f furigana4subtitles furigana4subtitles-cli *.o *.ass
+	rm -rf $(OBJDIR) $(TARGETS)
+	rm -f *.ass
+
+# Check coding style (requires checkpatch.pl from Linux kernel)
+checkpatch:
+	@if command -v checkpatch.pl >/dev/null 2>&1; then \
+		checkpatch.pl --no-tree -f $(SRCS) main.c main_cli.c include/*.h; \
+	else \
+		echo "checkpatch.pl not found in PATH"; \
+	fi
+
+# Static analysis with sparse (if available)
+sparse:
+	@if command -v sparse >/dev/null 2>&1; then \
+		sparse $(CFLAGS) $(SRCS) main.c main_cli.c; \
+	else \
+		echo "sparse not found in PATH"; \
+	fi
