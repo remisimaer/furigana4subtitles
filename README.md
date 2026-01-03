@@ -74,17 +74,6 @@ make clean
 ./furigana4subtitles-cli
 ```
 
-```
-  ╔══════════════════════════════════════════════════════════════╗
-  ║                           MAIN MENU                          ║
-  ║              .srt → .ass with furigana (ふりがな)             ║
-  ╠══════════════════════════════════════════════════════════════╣
-  ║   [1] Convert subtitles                                      ║
-  ║   [2] Set font size (current:  52px)                         ║
-  ║   [q] Quit                                                   ║
-  ╚══════════════════════════════════════════════════════════════╝
-```
-
 **Features:**
 - Convert subtitles .srt files and/or subtitles .srt contained in folders
 - Adjustable font size (16-120px) with proportional furigana scaling
