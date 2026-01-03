@@ -2,7 +2,7 @@
 
 A free & open-source tool for Japanese learners who watch anime with Japanese subtitles.
 
-**Furigana4Subtitles** automatically converts `.srt` subtitles into `.ass` format, with hiragana readings (ふりがな) displayed above kanji — no more pausing to look up readings.
+**Furigana4Subtitles** automatically converts .srt subtitles into .ass format, with hiragana readings (ふりがな) displayed above kanji: no more pausing to look up readings.
 
 It works seamlessly with **VLC** (uses a rendering technique compatible with VLC, unlike ruby annotations).
 
@@ -42,8 +42,8 @@ make
 ```
 
 This produces two executables:
-- `furigana4subtitles` — command-line version
-- `furigana4subtitles-cli` — interactive menu version
+- `furigana4subtitles` : command-line version
+- `furigana4subtitles-cli` : interactive menu version
 
 Clean build artifacts:
 ```bash
@@ -125,4 +125,4 @@ If the project becomes popular:
 
 ## Author
 
-Rémi SIMAER — <rsimaer@gmail.com>
+Rémi SIMAER : <rsimaer@gmail.com>
