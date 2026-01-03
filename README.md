@@ -105,7 +105,7 @@ obj/                    # Compiled object files (not committed)
 
 If the project becomes popular:
 
-- A GUI version will be developed for Windows and GNU/Linux. Raylib is a candidate, but suggestions for other lightweight, cross-platform solutions are welcome.
+- A GUI version will be developed for Windows, GNU/Linux, and macOS. Raylib is a candidate, but suggestions for other lightweight, cross-platform solutions are welcome.
 - A one-click installer will be developed for Windows, GNU/Linux, and macOS.
 
 ## License
