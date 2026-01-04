@@ -9,6 +9,8 @@ It works seamlessly with **VLC** (uses a rendering technique compatible with VLC
 ![Alt text](furigana4subtitles.png)
 
 ## Prerequisites
+### Video tutorial
+If you prefer a video format, [you can follow all the steps on YouTube.](https://youtu.be/DEWwYSAeoWE).
 
 ### Windows
 For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps. 
